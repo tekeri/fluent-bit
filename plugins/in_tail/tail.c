@@ -86,6 +86,10 @@ static int in_tail_collect_pending(struct flb_input_instance *ins,
         if (file->pending_bytes <= 0) {
             continue;
         }
+        /* Read a single event file only */
+        if (&ctx->sequential_collect && active) {
+            break;
+        }
 
         ret = flb_tail_file_chunk(file);
         switch (ret) {
@@ -630,6 +634,12 @@ static struct flb_config_map config_map[] = {
      FLB_CONFIG_MAP_BOOL, "exit_on_eof", "false",
      0, FLB_TRUE, offsetof(struct flb_tail_config, exit_on_eof),
      "exit Fluent Bit when reaching EOF on a monitored file."
+    },
+    {
+     FLB_CONFIG_MAP_BOOL, "sequential_collect", "false",
+     0, FLB_TRUE, offsetof(struct flb_tail_config, sequential_collect),
+     "Read files one by one instead of default round-robin fashion. "
+     "Useful if you suffer scattered delays under heavy load."
     },
 
     {
